@@ -3,7 +3,7 @@ once file is written locally, pls commit changes here so all members are able to
 
 Steps:
 1. **Change the file path first -- line 57**
-    It is where your assignment locate
+    It is where your assignment locate '\n'
     *Remember to put your .csv file together within same folder*
 
 2. **Import the file -- line 1 to line 62**
