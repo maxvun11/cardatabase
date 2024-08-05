@@ -1,5 +1,6 @@
 --Create Actual Table--
 CREATE TABLE CarData (
+    ID NUMBER PRIMARY KEY,
     Car_Name VARCHAR2(50),
     Year NUMBER,
     Selling_Price NUMBER,
@@ -10,6 +11,24 @@ CREATE TABLE CarData (
     Transmission VARCHAR2(10),
     Owner NUMBER
 );
+
+CREATE SEQUENCE CarData_seq
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+CREATE OR REPLACE TRIGGER CarData_before_insert
+BEFORE INSERT ON CarData
+FOR EACH ROW
+BEGIN
+    IF :NEW.ID IS NULL THEN
+        SELECT CarData_seq.NEXTVAL
+        INTO :NEW.ID
+        FROM dual;
+    END IF;
+END;
+/
 
 --Create External Table--
 CREATE TABLE CarData_ext (
@@ -38,8 +57,11 @@ REJECT LIMIT UNLIMITED;
 CREATE OR REPLACE DIRECTORY my_dir AS 'M:\Y3S2\AdvanceDB\Assgm_Max\cardatabase';
 
 --Insert Data into Internal/Actual Table--
-INSERT INTO CarData
-SELECT * FROM CarData_ext;
+INSERT INTO CarData (Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner)
+SELECT Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner
+FROM CarData_ext;
+
+------------------------------------------------------------------------------------------------------------------------------------------
 
 --Create Car--
 CREATE OR REPLACE PROCEDURE create_car(
@@ -62,6 +84,36 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error creating record: ' || SQLERRM);
 END;
 /
+SET SERVEROUTPUT ON
+
+-- Prompt user for input--
+ACCEPT car_name PROMPT 'Enter Car Name: '
+ACCEPT year PROMPT 'Enter Year: '
+ACCEPT selling_price PROMPT 'Enter Selling Price: '
+ACCEPT present_price PROMPT 'Enter Present Price: '
+ACCEPT kms_driven PROMPT 'Enter Kms Driven: '
+ACCEPT fuel_type PROMPT 'Enter Fuel Type: '
+ACCEPT seller_type PROMPT 'Enter Seller Type: '
+ACCEPT transmission PROMPT 'Enter Transmission: '
+ACCEPT owner PROMPT 'Enter Owner: '
+
+-- Execute the procedure with the provided values--
+BEGIN
+    create_car(
+        '&car_name',
+        &year,
+        &selling_price,
+        &present_price,
+        &kms_driven,
+        '&fuel_type',
+        '&seller_type',
+        '&transmission',
+        &owner
+    );
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------------------
 
 --Get all cars--
 CREATE OR REPLACE PROCEDURE get_all_cars AS
@@ -105,6 +157,7 @@ EXCEPTION
 END;
 /
 
+------------------------------------------------------------------------------------------------------------------------------------------
 
 --Retrieve Car with Name--
 CREATE OR REPLACE PROCEDURE read_car(p_car_name IN VARCHAR2) AS
@@ -140,9 +193,11 @@ EXCEPTION
 END;
 /
 
+------------------------------------------------------------------------------------------------------------------------------------------
 
 --Update Car--
 CREATE OR REPLACE PROCEDURE update_car(
+    p_id IN NUMBER,
     p_car_name IN VARCHAR2,
     p_year IN NUMBER,
     p_selling_price IN NUMBER,
@@ -155,7 +210,8 @@ CREATE OR REPLACE PROCEDURE update_car(
 ) AS
 BEGIN
     UPDATE CarData
-    SET Year = p_year,
+    SET Car_Name = p_car_name,
+        Year = p_year,
         Selling_Price = p_selling_price,
         Present_Price = p_present_price,
         Kms_Driven = p_kms_driven,
@@ -163,10 +219,10 @@ BEGIN
         Seller_Type = p_seller_type,
         Transmission = p_transmission,
         Owner = p_owner
-    WHERE Car_Name = p_car_name;
+    WHERE ID = p_id;
 
     IF SQL%ROWCOUNT = 0 THEN
-        DBMS_OUTPUT.PUT_LINE('No record found for car name: ' || p_car_name);
+        DBMS_OUTPUT.PUT_LINE('No record found for ID: ' || p_id);
     ELSE
         COMMIT;
         DBMS_OUTPUT.PUT_LINE('Record updated successfully.');
@@ -176,15 +232,47 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error updating record: ' || SQLERRM);
 END;
 /
+SET SERVEROUTPUT ON
+
+-- Prompt user for input
+ACCEPT id PROMPT 'Enter ID of the record to update: '
+ACCEPT car_name PROMPT 'Enter new Car Name: '
+ACCEPT year PROMPT 'Enter new Year: '
+ACCEPT selling_price PROMPT 'Enter new Selling Price: '
+ACCEPT present_price PROMPT 'Enter new Present Price: '
+ACCEPT kms_driven PROMPT 'Enter new Kms Driven: '
+ACCEPT fuel_type PROMPT 'Enter new Fuel Type: '
+ACCEPT seller_type PROMPT 'Enter new Seller Type: '
+ACCEPT transmission PROMPT 'Enter new Transmission: '
+ACCEPT owner PROMPT 'Enter new Owner: '
+
+-- Execute the procedure with the provided values
+BEGIN
+    update_car(
+        &id,
+        '&car_name',
+        &year,
+        &selling_price,
+        &present_price,
+        &kms_driven,
+        '&fuel_type',
+        '&seller_type',
+        '&transmission',
+        &owner
+    );
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------------------
 
 --Delete Car--
-CREATE OR REPLACE PROCEDURE delete_car(p_car_name IN VARCHAR2) AS
+CREATE OR REPLACE PROCEDURE delete_car(p_id IN NUMBER) AS
 BEGIN
     DELETE FROM CarData
-    WHERE Car_Name = p_car_name;
+    WHERE ID = p_id;
 
     IF SQL%ROWCOUNT = 0 THEN
-        DBMS_OUTPUT.PUT_LINE('No record found for car name: ' || p_car_name);
+        DBMS_OUTPUT.PUT_LINE('No record found for ID: ' || p_id);
     ELSE
         COMMIT;
         DBMS_OUTPUT.PUT_LINE('Record deleted successfully.');
@@ -194,6 +282,20 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error deleting record: ' || SQLERRM);
 END;
 /
+SET SERVEROUTPUT ON
+
+-- Prompt user for input
+ACCEPT id PROMPT 'Enter ID of the record to delete: '
+
+-- Execute the procedure with the provided value
+BEGIN
+    delete_car(
+        &id
+    );
+END;
+/
+
+------------------------------------------------------------------------------------------------------------------------------------------
 
 -- Index on Year--
 CREATE INDEX idx_car_year ON CarData (Year);
