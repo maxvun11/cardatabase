@@ -76,12 +76,18 @@ CREATE OR REPLACE PROCEDURE create_car(
     p_owner IN NUMBER
 ) AS
 BEGIN
-    INSERT INTO CarData (Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner)
-    VALUES (p_car_name, p_year, p_selling_price, p_present_price, p_kms_driven, p_fuel_type, p_seller_type, p_transmission, p_owner);
-    COMMIT;
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error creating record: ' || SQLERRM);
+    SAVEPOINT before_insert;
+    
+    BEGIN
+        INSERT INTO CarData (Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner)
+        VALUES (p_car_name, p_year, p_selling_price, p_present_price, p_kms_driven, p_fuel_type, p_seller_type, p_transmission, p_owner);
+        COMMIT;
+        DBMS_OUTPUT.PUT_LINE('Record created successfully.');
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK TO before_insert;
+            DBMS_OUTPUT.PUT_LINE('Error creating record: ' || SQLERRM);
+    END;
 END;
 /
 SET SERVEROUTPUT ON
@@ -110,6 +116,35 @@ BEGIN
         '&transmission',
         &owner
     );
+END;
+/
+
+--Before Trigger--
+CREATE OR REPLACE TRIGGER before_insert_car
+BEFORE INSERT ON CarData
+FOR EACH ROW
+BEGIN
+    -- Validate the data
+    IF :NEW.Year < 1886 OR :NEW.Year > EXTRACT(YEAR FROM SYSDATE) THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Invalid Year. Please enter a valid year.');
+    END IF;
+    
+    IF :NEW.Selling_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Selling Price cannot be negative.');
+    END IF;
+    
+    IF :NEW.Present_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Present Price cannot be negative.');
+    END IF;
+END;
+/
+
+--After Trigger--
+CREATE OR REPLACE TRIGGER after_insert_car
+AFTER INSERT ON CarData
+FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('New car record inserted: ' || :NEW.Car_Name);
 END;
 /
 
@@ -209,27 +244,33 @@ CREATE OR REPLACE PROCEDURE update_car(
     p_owner IN NUMBER
 ) AS
 BEGIN
-    UPDATE CarData
-    SET Car_Name = p_car_name,
-        Year = p_year,
-        Selling_Price = p_selling_price,
-        Present_Price = p_present_price,
-        Kms_Driven = p_kms_driven,
-        Fuel_Type = p_fuel_type,
-        Seller_Type = p_seller_type,
-        Transmission = p_transmission,
-        Owner = p_owner
-    WHERE ID = p_id;
+    SAVEPOINT before_update;
 
-    IF SQL%ROWCOUNT = 0 THEN
-        DBMS_OUTPUT.PUT_LINE('No record found for ID: ' || p_id);
-    ELSE
-        COMMIT;
-        DBMS_OUTPUT.PUT_LINE('Record updated successfully.');
-    END IF;
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error updating record: ' || SQLERRM);
+    BEGIN
+        UPDATE CarData
+        SET Car_Name = p_car_name,
+            Year = p_year,
+            Selling_Price = p_selling_price,
+            Present_Price = p_present_price,
+            Kms_Driven = p_kms_driven,
+            Fuel_Type = p_fuel_type,
+            Seller_Type = p_seller_type,
+            Transmission = p_transmission,
+            Owner = p_owner
+        WHERE ID = p_id;
+
+        IF SQL%ROWCOUNT = 0 THEN
+            ROLLBACK TO before_update;
+            DBMS_OUTPUT.PUT_LINE('No record found for ID: ' || p_id);
+        ELSE
+            COMMIT;
+            DBMS_OUTPUT.PUT_LINE('Record updated successfully.');
+        END IF;
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK TO before_update;
+            DBMS_OUTPUT.PUT_LINE('Error updating record: ' || SQLERRM);
+    END;
 END;
 /
 SET SERVEROUTPUT ON
@@ -263,23 +304,58 @@ BEGIN
 END;
 /
 
+--Before Trigger--
+CREATE OR REPLACE TRIGGER before_update_car
+BEFORE UPDATE ON CarData
+FOR EACH ROW
+BEGIN
+    -- Validate the data
+    IF :NEW.Year < 1886 OR :NEW.Year > EXTRACT(YEAR FROM SYSDATE) THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Invalid Year. Please enter a valid year.');
+    END IF;
+    
+    IF :NEW.Selling_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Selling Price cannot be negative.');
+    END IF;
+    
+    IF :NEW.Present_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Present Price cannot be negative.');
+    END IF;
+END;
+/
+
+--After Trigger--
+CREATE OR REPLACE TRIGGER after_update_car
+AFTER UPDATE ON CarData
+FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Car record updated: ' || :NEW.Car_Name);
+END;
+/
+
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 --Delete Car--
 CREATE OR REPLACE PROCEDURE delete_car(p_id IN NUMBER) AS
 BEGIN
-    DELETE FROM CarData
-    WHERE ID = p_id;
+    SAVEPOINT before_delete;
 
-    IF SQL%ROWCOUNT = 0 THEN
-        DBMS_OUTPUT.PUT_LINE('No record found for ID: ' || p_id);
-    ELSE
-        COMMIT;
-        DBMS_OUTPUT.PUT_LINE('Record deleted successfully.');
-    END IF;
-EXCEPTION
-    WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error deleting record: ' || SQLERRM);
+    BEGIN
+        DELETE FROM CarData
+        WHERE ID = p_id;
+
+        IF SQL%ROWCOUNT = 0 THEN
+            ROLLBACK TO before_delete;
+            DBMS_OUTPUT.PUT_LINE('No record found for ID: ' || p_id);
+        ELSE
+            COMMIT;
+            DBMS_OUTPUT.PUT_LINE('Record deleted successfully.');
+        END IF;
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK TO before_delete;
+            DBMS_OUTPUT.PUT_LINE('Error deleting record: ' || SQLERRM);
+    END;
 END;
 /
 SET SERVEROUTPUT ON
@@ -292,6 +368,27 @@ BEGIN
     delete_car(
         &id
     );
+END;
+/
+
+--Before Trigger--
+CREATE OR REPLACE TRIGGER before_delete_car
+BEFORE DELETE ON CarData
+FOR EACH ROW
+BEGIN
+    -- Validate the data
+    IF :OLD.Selling_Price > 100000 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Cannot delete cars with a selling price above 100,000.');
+    END IF;
+END;
+/
+
+--After Trigger--
+CREATE OR REPLACE TRIGGER after_delete_car
+AFTER DELETE ON CarData
+FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Car record deleted: ' || :OLD.Car_Name);
 END;
 /
 
