@@ -64,6 +64,36 @@ FROM CarData_ext;
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 --Create Car--
+
+--Before Trigger--
+CREATE OR REPLACE TRIGGER before_insert_car
+BEFORE INSERT ON CarData
+FOR EACH ROW
+BEGIN
+    -- Validate the data
+    IF :NEW.Year < 1886 OR :NEW.Year > EXTRACT(YEAR FROM SYSDATE) THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Invalid Year. Please enter a valid year.');
+    END IF;
+    
+    IF :NEW.Selling_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Selling Price cannot be negative.');
+    END IF;
+    
+    IF :NEW.Present_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Present Price cannot be negative.');
+    END IF;
+END;
+/
+
+--After Trigger--
+CREATE OR REPLACE TRIGGER after_insert_car
+AFTER INSERT ON CarData
+FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('New car record inserted: ' || :NEW.Car_Name);
+END;
+/
+
 CREATE OR REPLACE PROCEDURE create_car(
     p_car_name IN VARCHAR2,
     p_year IN NUMBER,
@@ -116,35 +146,6 @@ BEGIN
         '&transmission',
         &owner
     );
-END;
-/
-
---Before Trigger--
-CREATE OR REPLACE TRIGGER before_insert_car
-BEFORE INSERT ON CarData
-FOR EACH ROW
-BEGIN
-    -- Validate the data
-    IF :NEW.Year < 1886 OR :NEW.Year > EXTRACT(YEAR FROM SYSDATE) THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Invalid Year. Please enter a valid year.');
-    END IF;
-    
-    IF :NEW.Selling_Price < 0 THEN
-        RAISE_APPLICATION_ERROR(-20002, 'Selling Price cannot be negative.');
-    END IF;
-    
-    IF :NEW.Present_Price < 0 THEN
-        RAISE_APPLICATION_ERROR(-20003, 'Present Price cannot be negative.');
-    END IF;
-END;
-/
-
---After Trigger--
-CREATE OR REPLACE TRIGGER after_insert_car
-AFTER INSERT ON CarData
-FOR EACH ROW
-BEGIN
-    DBMS_OUTPUT.PUT_LINE('New car record inserted: ' || :NEW.Car_Name);
 END;
 /
 
@@ -231,6 +232,36 @@ END;
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 --Update Car--
+
+--Before Trigger--
+CREATE OR REPLACE TRIGGER before_update_car
+BEFORE UPDATE ON CarData
+FOR EACH ROW
+BEGIN
+    -- Validate the data
+    IF :NEW.Year < 1886 OR :NEW.Year > EXTRACT(YEAR FROM SYSDATE) THEN
+        RAISE_APPLICATION_ERROR(-20001, 'Invalid Year. Please enter a valid year.');
+    END IF;
+    
+    IF :NEW.Selling_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20002, 'Selling Price cannot be negative.');
+    END IF;
+    
+    IF :NEW.Present_Price < 0 THEN
+        RAISE_APPLICATION_ERROR(-20003, 'Present Price cannot be negative.');
+    END IF;
+END;
+/
+
+--After Trigger--
+CREATE OR REPLACE TRIGGER after_update_car
+AFTER UPDATE ON CarData
+FOR EACH ROW
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Car record updated: ' || :NEW.Car_Name);
+END;
+/
+
 CREATE OR REPLACE PROCEDURE update_car(
     p_id IN NUMBER,
     p_car_name IN VARCHAR2,
@@ -304,38 +335,31 @@ BEGIN
 END;
 /
 
+------------------------------------------------------------------------------------------------------------------------------------------
+
+--Delete Car--
+
 --Before Trigger--
-CREATE OR REPLACE TRIGGER before_update_car
-BEFORE UPDATE ON CarData
+CREATE OR REPLACE TRIGGER before_delete_car
+BEFORE DELETE ON CarData
 FOR EACH ROW
 BEGIN
     -- Validate the data
-    IF :NEW.Year < 1886 OR :NEW.Year > EXTRACT(YEAR FROM SYSDATE) THEN
-        RAISE_APPLICATION_ERROR(-20001, 'Invalid Year. Please enter a valid year.');
-    END IF;
-    
-    IF :NEW.Selling_Price < 0 THEN
-        RAISE_APPLICATION_ERROR(-20002, 'Selling Price cannot be negative.');
-    END IF;
-    
-    IF :NEW.Present_Price < 0 THEN
-        RAISE_APPLICATION_ERROR(-20003, 'Present Price cannot be negative.');
+    IF :OLD.Selling_Price > 100000 THEN
+        RAISE_APPLICATION_ERROR(-20004, 'Cannot delete cars with a selling price above 100,000.');
     END IF;
 END;
 /
 
 --After Trigger--
-CREATE OR REPLACE TRIGGER after_update_car
-AFTER UPDATE ON CarData
+CREATE OR REPLACE TRIGGER after_delete_car
+AFTER DELETE ON CarData
 FOR EACH ROW
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('Car record updated: ' || :NEW.Car_Name);
+    DBMS_OUTPUT.PUT_LINE('Car record deleted: ' || :OLD.Car_Name);
 END;
 /
 
-------------------------------------------------------------------------------------------------------------------------------------------
-
---Delete Car--
 CREATE OR REPLACE PROCEDURE delete_car(p_id IN NUMBER) AS
 BEGIN
     SAVEPOINT before_delete;
@@ -371,41 +395,33 @@ BEGIN
 END;
 /
 
---Before Trigger--
-CREATE OR REPLACE TRIGGER before_delete_car
-BEFORE DELETE ON CarData
-FOR EACH ROW
-BEGIN
-    -- Validate the data
-    IF :OLD.Selling_Price > 100000 THEN
-        RAISE_APPLICATION_ERROR(-20004, 'Cannot delete cars with a selling price above 100,000.');
-    END IF;
-END;
-/
-
---After Trigger--
-CREATE OR REPLACE TRIGGER after_delete_car
-AFTER DELETE ON CarData
-FOR EACH ROW
-BEGIN
-    DBMS_OUTPUT.PUT_LINE('Car record deleted: ' || :OLD.Car_Name);
-END;
-/
-
 ------------------------------------------------------------------------------------------------------------------------------------------
 
--- Index on Year--
+--WHY USING INDEX?
+    --Faster Data Retrieval
+        --Search Optimization: Indexes allow the database to locate data without scanning every row in a table
+        --Efficient Sorting: Indexes help quickly sort the data on the indexed column(s), making operations like ORDER BY or range queries faster
+    --Reduced I/O Operations
+        --Less Disk Access: Instead of scanning the entire table, the database engine can use the index to quickly jump to the desired data
+    --Enhanced Performance for Joins
+        --Join Optimization: Indexes on the columns used in JOIN conditions can significantly improve the performance of join operations by quickly locating matching rows
+    --Improved Query Efficiency
+        --Selective Queries: Queries that filter based on specific conditions
+        --Aggregation and Grouping: Speed up aggregation operations like COUNT, SUM, AVG, and GROUP BY by reducing the number of rows the database needs to scan
+
+-- Index on Year --
+--e.g. SELECT * FROM CarData WHERE Year = 2011;
 CREATE INDEX idx_car_year ON CarData (Year);
 
--- Index on Selling_Price--
+-- Index on Selling_Price --
 CREATE INDEX idx_car_selling_price ON CarData (Selling_Price);
 
--- Index on Fuel_Type--
+-- Index on Fuel_Type --
 CREATE INDEX idx_car_fuel_type ON CarData (Fuel_Type);
 
---Index on Seller_Type--
+--Index on Seller_Type --
 CREATE INDEX idx_car_seller_type ON CarData (Seller_Type);
 
--- Composite Index on Fuel_Type and Transmission (for queries involving both columns)--
+-- Composite Index on Fuel_Type and Transmission (for queries involving both columns) --
+--e.g. SELECT * FROM CarData WHERE Fuel_Type = 'Petrol' AND Transmission = 'Manual';
 CREATE INDEX idx_car_fuel_transmission ON CarData (Fuel_Type, Transmission);
-
