@@ -35,7 +35,7 @@ ORGANIZATION EXTERNAL (
 REJECT LIMIT UNLIMITED;
 
 --Create Directory Object--
-CREATE OR REPLACE DIRECTORY my_dir AS 'M:\Y3S2\AdvanceDB\Assgm\cardatabase';
+CREATE OR REPLACE DIRECTORY my_dir AS 'M:\Y3S2\AdvanceDB\Assgm_Max\cardatabase';
 
 --Insert Data into Internal/Actual Table--
 INSERT INTO CarData
@@ -194,3 +194,19 @@ EXCEPTION
         DBMS_OUTPUT.PUT_LINE('Error deleting record: ' || SQLERRM);
 END;
 /
+
+-- Index on Year--
+CREATE INDEX idx_car_year ON CarData (Year);
+
+-- Index on Selling_Price--
+CREATE INDEX idx_car_selling_price ON CarData (Selling_Price);
+
+-- Index on Fuel_Type--
+CREATE INDEX idx_car_fuel_type ON CarData (Fuel_Type);
+
+--Index on Seller_Type--
+CREATE INDEX idx_car_seller_type ON CarData (Seller_Type);
+
+-- Composite Index on Fuel_Type and Transmission (for queries involving both columns)--
+CREATE INDEX idx_car_fuel_transmission ON CarData (Fuel_Type, Transmission);
+
