@@ -619,5 +619,251 @@ END;
 
 --- Generated report content ---
 
+---- Comprehensive Car Data Report ----
 
+--- Cars from the Year 2010 ---
+Car Name: sx4
+Year: 2010
+Selling Price: 2.65
+Present Price: 7.98
+Kms Driven: 41442
+Fuel Type: Petrol
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: alto k10
+Year: 2010
+Selling Price: 1.95
+Present Price: 3.95
+Kms Driven: 44542
+Fuel Type: Petrol
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: corolla altis
+Year: 2010
+Selling Price: 4.75
+Present Price: 18.54
+Kms Driven: 50000
+Fuel Type: Petrol
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: fortuner
+Year: 2010
+Selling Price: 9.25
+Present Price: 20.45
+Kms Driven: 59000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: corolla altis
+Year: 2010
+Selling Price: 5.25
+Present Price: 22.83
+Kms Driven: 80000
+Fuel Type: Petrol
+Seller Type: Dealer
+Transmission: Automatic
+Owner: 0
+-------------------------------
+Car Name: land cruiser
+Year: 2010
+Selling Price: 35
+Present Price: 92.6
+Kms Driven: 78000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: fortuner
+Year: 2010
+Selling Price: 9.65
+Present Price: 20.45
+Kms Driven: 50024
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: Bajaj Pulsar 220 F
+Year: 2010
+Selling Price: .52
+Present Price: .94
+Kms Driven: 45000
+Fuel Type: Petrol
+Seller Type: Individual
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: Bajaj Avenger 220 dtsi
+Year: 2010
+Selling Price: .45
+Present Price: .95
+Kms Driven: 27000
+Fuel Type: Petrol
+Seller Type: Individual
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: Honda Karizma
+Year: 2010
+Selling Price: .31
+Present Price: 1.05
+Kms Driven: 213000
+Fuel Type: Petrol
+Seller Type: Individual
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: TVS Wego
+Year: 2010
+Selling Price: .25
+Present Price: .52
+Kms Driven: 22000
+Fuel Type: Petrol
+Seller Type: Individual
+Transmission: Automatic
+Owner: 0
+-------------------------------
+Car Name: Honda CB twister
+Year: 2010
+Selling Price: .16
+Present Price: .51
+Kms Driven: 33000
+Fuel Type: Petrol
+Seller Type: Individual
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: i20
+Year: 2010
+Selling Price: 3.25
+Present Price: 6.79
+Kms Driven: 58000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Manual
+Owner: 1
+-------------------------------
+Car Name: jazz
+Year: 2010
+Selling Price: 2.25
+Present Price: 7.5
+Kms Driven: 61203
+Fuel Type: Petrol
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: city
+Year: 2010
+Selling Price: 3.25
+Present Price: 9.9
+Kms Driven: 38000
+Fuel Type: Petrol
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
 
+--- Cars with Selling Price Above 20 ---
+Car Name: benza
+Year: 2008
+Selling Price: 89
+Present Price: 28
+Kms Driven: 20000
+Fuel Type: Petrol
+Seller Type: Dealer
+Transmission: 0
+Owner: 0
+-------------------------------
+Car Name: land cruiser
+Year: 2010
+Selling Price: 35
+Present Price: 92.6
+Kms Driven: 78000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Manual
+Owner: 0
+-------------------------------
+Car Name: fortuner
+Year: 2017
+Selling Price: 33
+Present Price: 36.23
+Kms Driven: 6000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Automatic
+Owner: 0
+-------------------------------
+Car Name: fortuner
+Year: 2015
+Selling Price: 23.5
+Present Price: 35.96
+Kms Driven: 47000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Automatic
+Owner: 0
+-------------------------------
+Car Name: fortuner
+Year: 2015
+Selling Price: 23
+Present Price: 30.61
+Kms Driven: 40000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Automatic
+Owner: 0
+-------------------------------
+Car Name: fortuner
+Year: 2015
+Selling Price: 23
+Present Price: 30.61
+Kms Driven: 40000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Automatic
+Owner: 0
+-------------------------------
+Car Name: innova
+Year: 2017
+Selling Price: 23
+Present Price: 25.39
+Kms Driven: 15000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Automatic
+Owner: 0
+-------------------------------
+Car Name: innova
+Year: 2016
+Selling Price: 20.75
+Present Price: 25.39
+Kms Driven: 29000
+Fuel Type: Diesel
+Seller Type: Dealer
+Transmission: Automatic
+Owner: 0
+-------------------------------
+
+--- Average Selling Price by Year ---
+Year 2012: 3.8413043478260869565217391304347826087
+Year 2013: 3.54090909090909090909090909090909090909
+Year 2014: 4.76210526315789473684210526315789473684
+Year 2015: 5.92704918032786885245901639344262295082
+Year 2016: 5.2132
+Year 2017: 6.17852941176470588235294117647058823529
+Year 2018: 9.25
+Year 2019: No data found.
+Year 2020: No data found.
+
+---- End of Report ----
