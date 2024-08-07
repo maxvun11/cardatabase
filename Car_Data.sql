@@ -425,3 +425,199 @@ CREATE INDEX idx_car_seller_type ON CarData (Seller_Type);
 -- Composite Index on Fuel_Type and Transmission (for queries involving both columns) --
 --e.g. SELECT * FROM CarData WHERE Fuel_Type = 'Petrol' AND Transmission = 'Manual';
 CREATE INDEX idx_car_fuel_transmission ON CarData (Fuel_Type, Transmission);
+
+------------------------------------------------------------------------------------------------------------------------------
+
+--Data Analysis--
+--Extracting Useful Information--
+--- Procedure to get all cars from a specific year---
+CREATE OR REPLACE PROCEDURE get_cars_by_year(p_year IN NUMBER) AS
+    CURSOR car_cursor IS
+        SELECT Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner
+        FROM CarData
+        WHERE Year = p_year;
+        
+    v_car_name CarData.Car_Name%TYPE;
+    v_year CarData.Year%TYPE;
+    v_selling_price CarData.Selling_Price%TYPE;
+    v_present_price CarData.Present_Price%TYPE;
+    v_kms_driven CarData.Kms_Driven%TYPE;
+    v_fuel_type CarData.Fuel_Type%TYPE;
+    v_seller_type CarData.Seller_Type%TYPE;
+    v_transmission CarData.Transmission%TYPE;
+    v_owner CarData.Owner%TYPE;
+BEGIN
+    OPEN car_cursor;
+    
+    LOOP
+        FETCH car_cursor INTO v_car_name, v_year, v_selling_price, v_present_price, v_kms_driven, v_fuel_type, v_seller_type, v_transmission, v_owner;
+        
+        EXIT WHEN car_cursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE('Car Name: ' || v_car_name);
+        DBMS_OUTPUT.PUT_LINE('Year: ' || v_year);
+        DBMS_OUTPUT.PUT_LINE('Selling Price: ' || v_selling_price);
+        DBMS_OUTPUT.PUT_LINE('Present Price: ' || v_present_price);
+        DBMS_OUTPUT.PUT_LINE('Kms Driven: ' || v_kms_driven);
+        DBMS_OUTPUT.PUT_LINE('Fuel Type: ' || v_fuel_type);
+        DBMS_OUTPUT.PUT_LINE('Seller Type: ' || v_seller_type);
+        DBMS_OUTPUT.PUT_LINE('Transmission: ' || v_transmission);
+        DBMS_OUTPUT.PUT_LINE('Owner: ' || v_owner);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------');
+    END LOOP;
+    
+    CLOSE car_cursor;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error retrieving data: ' || SQLERRM);
+END;
+/
+
+--- Execute the procedure to get cars from a specific year ---
+BEGIN
+    get_cars_by_year(2010);
+END;
+/
+    
+-- Performing filtering table task --
+--- Procedure to get cars with selling price above a certain amount, sorted by price ---
+CREATE OR REPLACE PROCEDURE get_cars_by_price(p_min_price IN NUMBER) AS
+    CURSOR car_cursor IS
+        SELECT Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner
+        FROM CarData
+        WHERE Selling_Price > p_min_price
+        ORDER BY Selling_Price DESC;
+        
+    v_car_name CarData.Car_Name%TYPE;
+    v_year CarData.Year%TYPE;
+    v_selling_price CarData.Selling_Price%TYPE;
+    v_present_price CarData.Present_Price%TYPE;
+    v_kms_driven CarData.Kms_Driven%TYPE;
+    v_fuel_type CarData.Fuel_Type%TYPE;
+    v_seller_type CarData.Seller_Type%TYPE;
+    v_transmission CarData.Transmission%TYPE;
+    v_owner CarData.Owner%TYPE;
+BEGIN
+    OPEN car_cursor;
+    
+    LOOP
+        FETCH car_cursor INTO v_car_name, v_year, v_selling_price, v_present_price, v_kms_driven, v_fuel_type, v_seller_type, v_transmission, v_owner;
+        
+        EXIT WHEN car_cursor%NOTFOUND;
+        
+        DBMS_OUTPUT.PUT_LINE('Car Name: ' || v_car_name);
+        DBMS_OUTPUT.PUT_LINE('Year: ' || v_year);
+        DBMS_OUTPUT.PUT_LINE('Selling Price: ' || v_selling_price);
+        DBMS_OUTPUT.PUT_LINE('Present Price: ' || v_present_price);
+        DBMS_OUTPUT.PUT_LINE('Kms Driven: ' || v_kms_driven);
+        DBMS_OUTPUT.PUT_LINE('Fuel Type: ' || v_fuel_type);
+        DBMS_OUTPUT.PUT_LINE('Seller Type: ' || v_seller_type);
+        DBMS_OUTPUT.PUT_LINE('Transmission: ' || v_transmission);
+        DBMS_OUTPUT.PUT_LINE('Owner: ' || v_owner);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------');
+    END LOOP;
+    
+    CLOSE car_cursor;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error retrieving data: ' || SQLERRM);
+END;
+/
+
+--- Execute the procedure to get cars with selling price above 20 ---
+BEGIN
+    get_cars_by_price(20);
+END;
+/
+
+-- Create reusable PL/SQL functions and procedures to  perform calculations on the data --
+--- Calculate Average Selling Price by Year ---
+CREATE OR REPLACE FUNCTION get_avg_selling_price_by_year(p_year IN NUMBER) RETURN NUMBER IS
+    v_avg_price NUMBER;
+BEGIN
+    SELECT AVG(Selling_Price) INTO v_avg_price
+    FROM CarData
+    WHERE Year = p_year;
+
+    RETURN v_avg_price;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No records found for the year: ' || p_year);
+        RETURN NULL;
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error calculating average selling price: ' || SQLERRM);
+        RETURN NULL;
+END;
+/
+
+--- Execute the procedure for get_avg_selling_price_by_year by year 2017 ---
+DECLARE
+    v_avg_price NUMBER;
+BEGIN
+    v_avg_price := get_avg_selling_price_by_year(2017);
+    IF v_avg_price IS NOT NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Average Selling Price for 2017: ' || v_avg_price);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('No data found for the year 2017.');
+    END IF;
+END;
+/
+
+-- Generating meaningful report --
+
+CREATE OR REPLACE PROCEDURE generate_comprehensive_report AS
+    v_avg_price NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('---- Comprehensive Car Data Report ----');
+    DBMS_OUTPUT.PUT_LINE('');
+
+    -- Part 1: Cars from a Specific Year (e.g., 2010)
+    DBMS_OUTPUT.PUT_LINE('--- Cars from the Year 2010 ---');
+    BEGIN
+        get_cars_by_year(2010);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error retrieving cars for the year 2015: ' || SQLERRM);
+    END;
+    DBMS_OUTPUT.PUT_LINE('');
+
+    -- Part 2: Cars with Selling Price Above a Certain Amount (e.g., 20)
+    DBMS_OUTPUT.PUT_LINE('--- Cars with Selling Price Above 20 ---');
+    BEGIN
+        get_cars_by_price(20);
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('Error retrieving cars with selling price above 20: ' || SQLERRM);
+    END;
+    DBMS_OUTPUT.PUT_LINE('');
+
+    -- Part 3: Average Selling Price by Year
+    DBMS_OUTPUT.PUT_LINE('--- Average Selling Price by Year ---');
+    FOR year IN 2012..2020 LOOP
+        BEGIN
+            v_avg_price := get_avg_selling_price_by_year(year);
+            IF v_avg_price IS NOT NULL THEN
+                DBMS_OUTPUT.PUT_LINE('Year ' || year || ': ' || v_avg_price);
+            ELSE
+                DBMS_OUTPUT.PUT_LINE('Year ' || year || ': No data found.');
+            END IF;
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE('Error calculating average selling price for the year ' || year || ': ' || SQLERRM);
+        END;
+    END LOOP;
+    DBMS_OUTPUT.PUT_LINE('');
+
+    DBMS_OUTPUT.PUT_LINE('---- End of Report ----');
+END;
+/
+
+BEGIN
+    generate_comprehensive_report;
+END;
+/
+
+--- Generated report content ---
+
+
+
