@@ -1,1 +1,18 @@
 
+Car data report includes a detailed analysis of the car dataset, oriented towards cars of a certain year, 
+those whose selling prices are in a certain range, and the average selling prices of cars in different years. 
+There are three major divisions to the report.
+
+The first section in this report includes all cars produced in the year 2010. 
+Given information for each car pertains to the name of the car, manufacturing year, selling price, 
+current market price, kilometers driven, fuel type, type of seller, transmission type, and the number of previous owners. 
+This enables one to see the characteristics and market trend analysis for cars manufactured in the year 2010.
+
+The second section gives all cars whose selling price is more than a certain threshold, 20 in this case.
+Details about each car are given here, just as in the first section. 
+This section helps to list higher valued cars and analyze their attributes against the rest of the dataset.
+
+The third section contains the average selling price of cars year by year from 2012 to 2020. 
+It provides a brief insight into the average market trends for those years and may be helpful for market analysis, 
+investment insight, or historical trends. In this respect, the report details each year either by the average selling price 
+or, alternatively, that there is no data, thereby providing for a yearly comparison and insight into pricing trends.
