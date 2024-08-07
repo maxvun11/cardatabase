@@ -568,7 +568,7 @@ END;
 CREATE OR REPLACE PROCEDURE generate_comprehensive_report AS
     v_avg_price NUMBER;
 BEGIN
-    DBMS_OUTPUT.PUT_LINE('---- Comprehensive Car Data Report ----');
+    DBMS_OUTPUT.PUT_LINE('---- Car Data Report ----');
     DBMS_OUTPUT.PUT_LINE('');
 
     -- Part 1: Cars from a Specific Year (e.g., 2010)
@@ -619,7 +619,7 @@ END;
 
 --- Generated report content ---
 
----- Comprehensive Car Data Report ----
+---- Car Data Report ----
 
 --- Cars from the Year 2010 ---
 Car Name: sx4
