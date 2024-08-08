@@ -1031,4 +1031,68 @@ END;
 SET SERVEROUTPUT ON;
 EXECUTE process_cars_by_year(2014);  
 
+---Extract car selling price range----
+SELECT 
+    MIN(Selling_Price) AS Min_Price,
+    MAX(Selling_Price) AS Max_Price,
+    AVG(Selling_Price) AS Avg_Price
+FROM CarData;
+
+SELECT
+    CASE
+        WHEN selling_price < 1               THEN
+            'Below $10,000'
+        WHEN selling_price BETWEEN 1 AND 1.9 THEN
+            '$10,000 - $19,999'
+        WHEN selling_price BETWEEN 2 AND 2.9 THEN
+            '$20,000 - $29,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$30,000 - $39,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$40,000 - $49,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$50,000 - $59,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$60,000 - $69,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$70,000 - $79,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$80,000 - $89,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$90,000 - $99,999'
+        ELSE
+            'Above $100,000'
+    END      AS price_range,
+    COUNT(*) AS count
+FROM
+    cardata
+GROUP BY
+    CASE
+        WHEN selling_price < 1               THEN
+            'Below $10,000'
+        WHEN selling_price BETWEEN 1 AND 1.9 THEN
+            '$10,000 - $19,999'
+        WHEN selling_price BETWEEN 2 AND 2.9 THEN
+            '$20,000 - $29,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$30,000 - $39,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$40,000 - $49,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$50,000 - $59,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$60,000 - $69,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$70,000 - $79,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$80,000 - $89,999'
+        WHEN selling_price BETWEEN 3 AND 3.9 THEN
+            '$90,000 - $99,999'
+        ELSE
+            'Above $100,000'
+    END;
+
+
+
+
 
