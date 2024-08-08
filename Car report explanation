@@ -36,3 +36,12 @@ The procedure defines a cursor to select all car data for a specified year from 
 When executed, the procedure displays detailed information for each car in the specified year, allowing for a detailed examination of the data. This approach is useful for processing large datasets where row-by-row operations are needed.
 
 These PL/SQL procedures demonstrate advanced features such as handling aggregate data calculations, sorting data, and using cursors for detailed data retrieval. They provide valuable insights into car pricing trends and allow for detailed analysis of car data based on year, which can inform strategic decisions and market evaluations.
+
+Extraction : extract car selling price range
+The objective of this analysis is to extract and categorize the selling prices of cars from the `CarData` table to gain insights into the distribution of prices within predefined ranges.
+
+First, basic statistics of car selling prices, including minimum, maximum, and average prices, are extracted to understand the overall price spectrum. Next, the selling prices are categorized into specific ranges using a `CASE` statement in an SQL query. This categorization helps to group and count the number of cars falling into each price range, providing a clearer view of price distribution.
+
+The output includes two key results: 
+1. Basic statistics with the minimum, maximum, and average selling prices.
+2. A breakdown of the number of cars within each price range, such as 'Below $10,000', '$10,000 - $19,999', and so on, up to 'Above $100,000'. This categorized count offers valuable insights into how car prices are distributed across different ranges.
