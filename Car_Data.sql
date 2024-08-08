@@ -54,7 +54,7 @@ ORGANIZATION EXTERNAL (
 REJECT LIMIT UNLIMITED;
 
 --Create Directory Object--
-CREATE OR REPLACE DIRECTORY my_dir AS 'M:\Y3S2\AdvanceDB\Assgm_Max\cardatabase';
+CREATE OR REPLACE DIRECTORY my_dir AS 'C:\Users\HUAWEI\OneDrive\Desktop\SQL\Assignment1';
 
 --Insert Data into Internal/Actual Table--
 INSERT INTO CarData (Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner)
@@ -427,7 +427,6 @@ CREATE INDEX idx_car_seller_type ON CarData (Seller_Type);
 CREATE INDEX idx_car_fuel_transmission ON CarData (Fuel_Type, Transmission);
 
 ------------------------------------------------------------------------------------------------------------------------------
-
 --Data Analysis--
 --Extracting Useful Information--
 --- Procedure to get all cars from a specific year---
@@ -866,4 +865,170 @@ Year 2018: 9.25
 Year 2019: No data found.
 Year 2020: No data found.
 
+---- End of Report ---
+------------------------------------------------------------------------------------------------------------------------------
+-------Aggregations:Calculate the Percentage Change in Average Selling Price Year-over-Year--------
+DECLARE
+    v_avg_price_current   NUMBER;
+    v_avg_price_previous  NUMBER;
+    v_percentage_change   NUMBER;
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('--- Percentage Change in Average Selling Price Year-over-Year ---');
+
+    FOR year IN 2013..2020 LOOP
+        BEGIN
+            -- Get average price for the current year
+            v_avg_price_current := get_avg_selling_price_by_year(year);
+
+            -- Get average price for the previous year
+            v_avg_price_previous := get_avg_selling_price_by_year(year - 1);
+
+            IF v_avg_price_current IS NOT NULL AND v_avg_price_previous IS NOT NULL THEN
+                -- Calculate percentage change
+                v_percentage_change := ((v_avg_price_current - v_avg_price_previous) / v_avg_price_previous) * 100;
+
+                DBMS_OUTPUT.PUT_LINE('Year ' || year || ' vs ' || (year - 1) || ': ' || ROUND(v_percentage_change, 2) || '%');
+            ELSE
+                IF v_avg_price_current IS NULL THEN
+                    DBMS_OUTPUT.PUT_LINE('Year ' || year || ': No data found.');
+                END IF;
+                IF v_avg_price_previous IS NULL THEN
+                    DBMS_OUTPUT.PUT_LINE('Year ' || (year - 1) || ': No data found.');
+                END IF;
+            END IF;
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE('Error calculating percentage change for the year ' || year || ': ' || SQLERRM);
+        END;
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE('---- End of Report ----');
+END;
+/
+
+--report generated--
+--- Percentage Change in Average Selling Price Year-over-Year ---
+Year 2013 vs 2012: -7.96%
+Year 2014 vs 2013: 34.69%
+Year 2015 vs 2014: 24.46%
+Year 2016 vs 2015: -12.04%
+Year 2017 vs 2016: 19.1%
+Year 2018 vs 2017: 48.97%
+Year 2019: No data found.
+Year 2019: No data found.
 ---- End of Report ----
+
+----sorting : Sorting by Average Selling Price-------
+DECLARE
+    TYPE avg_price_record IS RECORD (
+        year        NUMBER,
+        avg_price   NUMBER
+    );
+    
+    TYPE avg_price_table IS TABLE OF avg_price_record INDEX BY PLS_INTEGER;
+    
+    v_avg_prices    avg_price_table;
+    v_temp          avg_price_record;
+    v_count         INTEGER := 1;
+    
+BEGIN
+    -- Collect the average selling prices by year
+    FOR year IN 2012..2020 LOOP
+        BEGIN
+            v_avg_prices(v_count).year := year;
+            v_avg_prices(v_count).avg_price := get_avg_selling_price_by_year(year);
+            v_count := v_count + 1;
+        EXCEPTION
+            WHEN OTHERS THEN
+                DBMS_OUTPUT.PUT_LINE('Error retrieving data for year ' || year || ': ' || SQLERRM);
+        END;
+    END LOOP;
+
+    -- Sorting the collection by average price (simple bubble sort)
+    FOR i IN 1..v_count-2 LOOP
+        FOR j IN 1..v_count-2 LOOP
+            IF v_avg_prices(j).avg_price > v_avg_prices(j+1).avg_price THEN
+                v_temp := v_avg_prices(j);
+                v_avg_prices(j) := v_avg_prices(j+1);
+                v_avg_prices(j+1) := v_temp;
+            END IF;
+        END LOOP;
+    END LOOP;
+
+    -- Output the sorted list
+    DBMS_OUTPUT.PUT_LINE('--- Sorted List of Years by Average Selling Price ---');
+    FOR i IN 1..v_count-1 LOOP
+        IF v_avg_prices(i).avg_price IS NOT NULL THEN
+            DBMS_OUTPUT.PUT_LINE('Year ' || v_avg_prices(i).year || ': ' || v_avg_prices(i).avg_price);
+        ELSE
+            DBMS_OUTPUT.PUT_LINE('Year ' || v_avg_prices(i).year || ': No data found.');
+        END IF;
+    END LOOP;
+
+    DBMS_OUTPUT.PUT_LINE('---- End of Sorted List ----');
+END;
+/
+
+--- Sorted List of Years by Average Selling Price ---
+Year 2013: 3.53565217391304347826086956521739130435
+Year 2012: 3.8413043478260869565217391304347826087
+Year 2014: 4.76210526315789473684210526315789473684
+Year 2016: 5.2132
+Year 2015: 5.92704918032786885245901639344262295082
+Year 2017: 6.20914285714285714285714285714285714286
+Year 2018: 9.25
+Year 2019: No data found.
+Year 2020: 2.2
+---- End of Sorted List ---
+
+---Additional Requirements---
+----Explore advanced PL/SQL features : cursors + filtering :filter car data by year
+SELECT * FROM all_tables WHERE table_name = 'CarData';
+
+CREATE OR REPLACE PROCEDURE process_cars_by_year(p_year IN NUMBER) AS
+    CURSOR car_cursor IS
+        SELECT Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner
+        FROM CarData
+        WHERE Year = p_year;
+
+    -- Variables to hold the data fetched by the cursor
+    v_car_name CarData.Car_Name%TYPE;
+    v_year CarData.Year%TYPE;
+    v_selling_price CarData.Selling_Price%TYPE;
+    v_present_price CarData.Present_Price%TYPE;
+    v_kms_driven CarData.Kms_Driven%TYPE;
+    v_fuel_type CarData.Fuel_Type%TYPE;
+    v_seller_type CarData.Seller_Type%TYPE;
+    v_transmission CarData.Transmission%TYPE;
+    v_owner CarData.Owner%TYPE;
+BEGIN
+    OPEN car_cursor;
+    
+    LOOP
+        FETCH car_cursor INTO v_car_name, v_year, v_selling_price, v_present_price, v_kms_driven, v_fuel_type, v_seller_type, v_transmission, v_owner;
+        EXIT WHEN car_cursor%NOTFOUND;
+        
+        -- Process each row (for demonstration purposes, we'll just print the data)
+        DBMS_OUTPUT.PUT_LINE('Car Name: ' || v_car_name);
+        DBMS_OUTPUT.PUT_LINE('Year: ' || v_year);
+        DBMS_OUTPUT.PUT_LINE('Selling Price: ' || v_selling_price);
+        DBMS_OUTPUT.PUT_LINE('Present Price: ' || v_present_price);
+        DBMS_OUTPUT.PUT_LINE('Kms Driven: ' || v_kms_driven);
+        DBMS_OUTPUT.PUT_LINE('Fuel Type: ' || v_fuel_type);
+        DBMS_OUTPUT.PUT_LINE('Seller Type: ' || v_seller_type);
+        DBMS_OUTPUT.PUT_LINE('Transmission: ' || v_transmission);
+        DBMS_OUTPUT.PUT_LINE('Owner: ' || v_owner);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------');
+    END LOOP;
+    
+    CLOSE car_cursor;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error processing cars: ' || SQLERRM);
+END;
+/
+
+SET SERVEROUTPUT ON;
+EXECUTE process_cars_by_year(2014);  
+
+
