@@ -1,18 +1,38 @@
-
-Car data report includes a detailed analysis of the car dataset, oriented towards cars of a certain year, 
-those whose selling prices are in a certain range, and the average selling prices of cars in different years. 
+Timun 
+Car data report includes a detailed analysis of the car dataset, oriented towards cars of a certain year, those whose selling prices are in a certain range, and the average selling prices of cars in different years. 
 There are three major divisions to the report.
 
 The first section in this report includes all cars produced in the year 2010. 
-Given information for each car pertains to the name of the car, manufacturing year, selling price, 
-current market price, kilometers driven, fuel type, type of seller, transmission type, and the number of previous owners. 
+Given information for each car pertains to the name of the car, manufacturing year, selling price, current market price, kilometers driven, fuel type, type of seller, transmission type, and the number of previous owners. 
 This enables one to see the characteristics and market trend analysis for cars manufactured in the year 2010.
 
-The second section gives all cars whose selling price is more than a certain threshold, 20 in this case.
-Details about each car are given here, just as in the first section. 
+The second section gives all cars whose selling price is more than a certain threshold, 20 in this case. Details about each car are given here, just as in the first section. 
 This section helps to list higher valued cars and analyze their attributes against the rest of the dataset.
 
-The third section contains the average selling price of cars year by year from 2012 to 2020. 
-It provides a brief insight into the average market trends for those years and may be helpful for market analysis, 
+The third section contains the average selling price of cars year by year from 2012 to 2020. It provides a brief insight into the average market trends for those years and may be helpful for market analysis, 
 investment insight, or historical trends. In this respect, the report details each year either by the average selling price 
 or, alternatively, that there is no data, thereby providing for a yearly comparison and insight into pricing trends.
+
+ 
+Yunixe
+Aggregations: Calculate Percentage Change in Average Selling Price Year-over-Year
+The goal of this procedure is to determine the annual percentage change in the average selling price of cars between the years 2013 and 2020. This analysis helps in understanding market trends and price fluctuations over the specified years.
+
+The procedure iterates over each year within the range, calculates the average selling price for the current year and the previous year using a function, and then computes the percentage change between these two values. If data is missing for either year, the procedure reports it accordingly. This procedure provides insight into how the average selling price has evolved over the years, which can be useful for market analysis and decision-making.
+
+The output includes a list of the percentage changes year-over-year, highlighting significant increases or decreases in car prices. The procedure handles missing data gracefully and reports errors if any issues arise during the calculation.
+
+Sorting by Average Selling Price
+This procedure aims to sort and display the average selling prices of cars by year, from 2012 to 2020, to identify trends and compare prices across these years.
+
+The procedure first collects average selling prices for each year into a PL/SQL collection. It then sorts these records using a simple bubble sort algorithm. After sorting, it outputs the sorted list, providing a clear view of how average prices compare across different years.
+
+The output includes a sorted list of years based on their average selling prices. This helps in identifying which years had the highest and lowest average prices, and can assist in making informed decisions based on historical price data.
+
+Filtering Car Data by Year Using Cursors
+The purpose of this procedure is to filter and process car data from a specific year, using PL/SQL cursors to fetch and handle the data.
+The procedure defines a cursor to select all car data for a specified year from the `CarData` table. It then fetches data from the cursor and prints details for each car, including its name, year, selling price, present price, kilometers driven, fuel type, seller type, transmission, and owner. This procedure demonstrates the use of cursors for retrieving and processing data row by row.
+
+When executed, the procedure displays detailed information for each car in the specified year, allowing for a detailed examination of the data. This approach is useful for processing large datasets where row-by-row operations are needed.
+
+These PL/SQL procedures demonstrate advanced features such as handling aggregate data calculations, sorting data, and using cursors for detailed data retrieval. They provide valuable insights into car pricing trends and allow for detailed analysis of car data based on year, which can inform strategic decisions and market evaluations.
