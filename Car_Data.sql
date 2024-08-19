@@ -1,65 +1,149 @@
---Create Actual Table--
-CREATE TABLE CarData (
-    ID NUMBER PRIMARY KEY,
-    Car_Name VARCHAR2(50),
-    Year NUMBER,
-    Selling_Price NUMBER,
-    Present_Price NUMBER,
-    Kms_Driven NUMBER,
-    Fuel_Type VARCHAR2(10),
-    Seller_Type VARCHAR2(10),
-    Transmission VARCHAR2(10),
-    Owner NUMBER
-);
+-- Prompt user for file path and file name
+ACCEPT file_path PROMPT 'Enter the file path (e.g., M:\Y3S2\AdvanceDB\Assgm_Max\cardatabase): '
+ACCEPT file_name PROMPT 'Enter the file name (e.g., cardata.csv): '
 
-CREATE SEQUENCE CarData_seq
-    START WITH 1
-    INCREMENT BY 1
-    NOCACHE
-    NOCYCLE;
-
-CREATE OR REPLACE TRIGGER CarData_before_insert
-BEFORE INSERT ON CarData
-FOR EACH ROW
+DECLARE
+    v_file_path VARCHAR2(255) := '&file_path';
+    v_file_name VARCHAR2(255) := '&file_name';
+    v_sql VARCHAR2(4000);
+    v_error_message VARCHAR2(4000);
 BEGIN
-    IF :NEW.ID IS NULL THEN
-        SELECT CarData_seq.NEXTVAL
-        INTO :NEW.ID
-        FROM dual;
-    END IF;
+    -- Create Directory Object
+    BEGIN
+        EXECUTE IMMEDIATE 'CREATE OR REPLACE DIRECTORY my_dir AS ''' || v_file_path || '''';
+    EXCEPTION
+        WHEN OTHERS THEN
+            v_error_message := 'Error creating directory: ' || SQLERRM;
+            DBMS_OUTPUT.PUT_LINE(v_error_message);
+            RAISE;
+    END;
+
+    -- Create External Table
+    BEGIN
+        v_sql := '
+            CREATE TABLE CarData_ext (
+                Car_Name VARCHAR2(50),
+                Year NUMBER,
+                Selling_Price NUMBER,
+                Present_Price NUMBER,
+                Kms_Driven NUMBER,
+                Fuel_Type VARCHAR2(10),
+                Seller_Type VARCHAR2(10),
+                Transmission VARCHAR2(10),
+                Owner NUMBER
+            )
+            ORGANIZATION EXTERNAL (
+                TYPE ORACLE_LOADER
+                DEFAULT DIRECTORY my_dir
+                ACCESS PARAMETERS (
+                    records delimited by newline
+                    fields terminated by '','' optionally enclosed by ''"'' 
+                )
+                LOCATION (''' || v_file_name || ''')
+            )
+            REJECT LIMIT UNLIMITED
+        ';
+        EXECUTE IMMEDIATE v_sql;
+    EXCEPTION
+        WHEN OTHERS THEN
+            v_error_message := 'Error creating external table: ' || SQLERRM;
+            DBMS_OUTPUT.PUT_LINE(v_error_message);
+            RAISE;
+    END;
+
+    -- Create Internal Table (if not already created)
+    BEGIN
+        EXECUTE IMMEDIATE '
+            CREATE TABLE CarData (
+                ID NUMBER PRIMARY KEY,
+                Car_Name VARCHAR2(50),
+                Year NUMBER,
+                Selling_Price NUMBER,
+                Present_Price NUMBER,
+                Kms_Driven NUMBER,
+                Fuel_Type VARCHAR2(10),
+                Seller_Type VARCHAR2(10),
+                Transmission VARCHAR2(10),
+                Owner NUMBER
+            )
+        ';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE = -955 THEN
+                -- Table already exists, ignore
+                NULL;
+            ELSE
+                v_error_message := 'Error creating internal table: ' || SQLERRM;
+                DBMS_OUTPUT.PUT_LINE(v_error_message);
+                RAISE;
+            END IF;
+    END;
+
+    -- Create Sequence
+    BEGIN
+        EXECUTE IMMEDIATE '
+            CREATE SEQUENCE CarData_seq
+                START WITH 1
+                INCREMENT BY 1
+                NOCACHE
+                NOCYCLE
+        ';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE = -955 THEN
+                -- Sequence already exists, ignore
+                NULL;
+            ELSE
+                v_error_message := 'Error creating sequence: ' || SQLERRM;
+                DBMS_OUTPUT.PUT_LINE(v_error_message);
+                RAISE;
+            END IF;
+    END;
+
+    -- Create Trigger
+    BEGIN
+        EXECUTE IMMEDIATE '
+            CREATE OR REPLACE TRIGGER CarData_before_insert
+            BEFORE INSERT ON CarData
+            FOR EACH ROW
+            BEGIN
+                IF :NEW.ID IS NULL THEN
+                    SELECT CarData_seq.NEXTVAL
+                    INTO :NEW.ID
+                    FROM dual;
+                END IF;
+            END;
+        ';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLCODE = -4080 THEN
+                -- Trigger already exists, ignore
+                NULL;
+            ELSE
+                v_error_message := 'Error creating trigger: ' || SQLERRM;
+                DBMS_OUTPUT.PUT_LINE(v_error_message);
+                RAISE;
+            END IF;
+    END;
+
+    -- Insert Data into Internal/Actual Table
+    BEGIN
+        EXECUTE IMMEDIATE '
+            INSERT INTO CarData (Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner)
+            SELECT Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner
+            FROM CarData_ext
+        ';
+    EXCEPTION
+        WHEN OTHERS THEN
+            v_error_message := 'Error inserting data into internal table: ' || SQLERRM;
+            DBMS_OUTPUT.PUT_LINE(v_error_message);
+            RAISE;
+    END;
+    
+    DBMS_OUTPUT.PUT_LINE('Process completed successfully.');
+
 END;
 /
-
---Create External Table--
-CREATE TABLE CarData_ext (
-    Car_Name VARCHAR2(50),
-    Year NUMBER,
-    Selling_Price NUMBER,
-    Present_Price NUMBER,
-    Kms_Driven NUMBER,
-    Fuel_Type VARCHAR2(10),
-    Seller_Type VARCHAR2(10),
-    Transmission VARCHAR2(10),
-    Owner NUMBER
-)
-ORGANIZATION EXTERNAL (
-    TYPE ORACLE_LOADER
-    DEFAULT DIRECTORY my_dir
-    ACCESS PARAMETERS (
-        records delimited by newline
-        fields terminated by ',' optionally enclosed by '"'
-    )
-    LOCATION ('cardata.csv')
-)
-REJECT LIMIT UNLIMITED;
-
---Create Directory Object--
-CREATE OR REPLACE DIRECTORY my_dir AS 'C:\Users\HUAWEI\OneDrive\Desktop\SQL\Assignment1';
-
---Insert Data into Internal/Actual Table--
-INSERT INTO CarData (Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner)
-SELECT Car_Name, Year, Selling_Price, Present_Price, Kms_Driven, Fuel_Type, Seller_Type, Transmission, Owner
-FROM CarData_ext;
 
 ------------------------------------------------------------------------------------------------------------------------------------------
 
