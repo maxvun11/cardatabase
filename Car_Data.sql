@@ -568,6 +568,7 @@ EXCEPTION
 END;
 /
 
+SET SERVEROUTPUT ON;
 --- Execute the procedure to get cars from a specific year ---
 -- Prompt the user to enter specific year --
 ACCEPT user_year PROMPT 'Enter the year you want to get cars from: '
