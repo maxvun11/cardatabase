@@ -651,18 +651,19 @@ EXCEPTION
 END;
 /
 
+SET SERVEROUTPUT ON
 -- Prompt user to enter the year --
-ACCEPT user_year PROMPT 'Enter the year you want to calculate the average selling price for: '
+ACCEPT year PROMPT 'Enter the year you want to calculate the average selling price for: '
 
 -- PL/SQL Block to calculate and display the average selling price --
 DECLARE
     v_avg_price NUMBER;
 BEGIN
-    v_avg_price := get_avg_selling_price_by_year(&user_year);
+    v_avg_price := get_avg_selling_price_by_year(&year);
     IF v_avg_price IS NOT NULL THEN
-        DBMS_OUTPUT.PUT_LINE('Average Selling Price for ' || &user_year || ': ' || v_avg_price);
+        DBMS_OUTPUT.PUT_LINE('Average Selling Price for ' || &year || ': ' || v_avg_price);
     ELSE
-        DBMS_OUTPUT.PUT_LINE('No data found for the year ' || &user_year || '.');
+        DBMS_OUTPUT.PUT_LINE('No data found for the year ' || &year || '.');
     END IF;
 END;
 /
